@@ -1,0 +1,38 @@
+version: '3'
+services:
+  live-reload:
+    build: .
+    container_name: users-api
+    environment:
+      PORT: 3000
+    command: bash .docker/start.sh
+    volumes:
+      - .:/home/node/app
+    ports:
+      - "3000:3000"
+    networks:
+      - user-api-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - db
+  db:
+    build: ./.docker/mysql
+    container_name: users-api-db
+    command: --default-authentication-plugin=mysql_native_password
+    tty: true
+    ports:
+      - "3308:3306"
+    volumes:
+      - ./.docker/dbdata:/var/lib/mysql
+      - ./.docker/mysql:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    cap_add:
+      - SYS_NICE
+    networks:
+      - user-api-network
+networks:
+  user-api-network:
+    driver: bridge
+
