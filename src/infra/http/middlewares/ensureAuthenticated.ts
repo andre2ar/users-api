@@ -1,8 +1,8 @@
 import {NextFunction, Request, Response} from "express";
 import {verify} from "jsonwebtoken";
 import {container} from "tsyringe";
-import PrismaUsersRepository from "../../../modules/users/infra/prisma/PrismaUsersRepository";
 import AppError from "../../../errors/AppError";
+import IUsersRepository from "../../../modules/users/infra/IUsersRepository";
 
 interface IPayload {
     iat: number;
@@ -27,7 +27,7 @@ export async function ensureAuthenticated(request: Request, response: Response, 
         throw new AppError("Invalid token", 401);
     }
 
-    const usersRepository = container.resolve(PrismaUsersRepository)
+    const usersRepository = container.resolve<IUsersRepository>('UsersRepository')
     const user = await usersRepository.findById(userId);
 
     if(!user) {
